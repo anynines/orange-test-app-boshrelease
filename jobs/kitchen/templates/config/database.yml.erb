@@ -1,0 +1,17 @@
+production:
+  adapter: postgresql
+  encoding: <%= p('restaurant_orange.database.encoding', 'utf8') %>
+  database: <%= p('restaurant_orange.database.database_name') %>
+  username: "<%= p('restaurant_orange.database.username') %>"
+  password: "<%= p('restaurant_orange.database.password') %>"
+  host: <%= p('restaurant_orange.database.host') %>
+  port: <%= p('restaurant_orange.database.port') %>
+
+development:
+  adapter: postgresql
+  encoding: <%= p('restaurant_orange.database.encoding', 'utf8') %>
+  database: <%= p('restaurant_orange.database.database_name') %>
+  username: "<%= p('restaurant_orange.database.username') %>"
+  password: "<%= p('restaurant_orange.database.password') %>"
+  host: <%= p('restaurant_orange.database.host') %>
+  port: <%= p('restaurant_orange.database.port') %>

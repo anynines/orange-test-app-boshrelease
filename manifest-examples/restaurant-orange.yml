@@ -44,8 +44,26 @@ instance_groups:
   - { name: restaurant_orange_app, release: restaurant-orange }
   networks:
   - name: dynamic
+- name: kitchen
+  instances: 1
+  vm_type: small
+  azs: [z1, z2, z3]
+  stemcell: ubuntu-trusty
+  jobs:
+  - { name: kitchen, release: restaurant-orange }
+  networks:
+  - name: dynamic
 
 properties:
+  databases:
+    port: 5432
+    databases:
+    - name: restaurantorange
+    roles:
+    - name: restaurantorangeuser
+      password: er8oigyqnp8
+      permissions: [SUPERUSER]
+
   restaurant_orange:
     secret_key_base: 'vfelqryfgnqlruiwcfnqwcfqwc' #((restaurant_orange_secret_key_base))
     port: 3000
@@ -58,14 +76,10 @@ properties:
       password: er8oigyqnp8 # ((restaurant_orange_db_password))
       host: 10.244.5.5
       port: 5432
-  databases:
-    port: 5432
-    databases:
-    - name: restaurantorange
-    roles:
-    - name: restaurantorangeuser
-      password: er8oigyqnp8
-      permissions: [SUPERUSER]
+
+  kitchen:
+    workers: 1
+
 
       # variables:
       # - name: restaurant_orange_secret_key_base

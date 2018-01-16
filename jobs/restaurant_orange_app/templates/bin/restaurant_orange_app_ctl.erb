@@ -6,7 +6,7 @@ set +x
 
 # Setup env vars and folders for the restaurant_orange script
 JOB_NAME="restaurant_orange_app"
-source /var/vcap/jobs/restaurant_orange_app/helpers/ctl_setup.sh $JOB_NAME
+source /var/vcap/jobs/$JOB_NAME/helpers/ctl_setup.sh $JOB_NAME
 
 # Setup env vars for ruby
 export PATH=/var/vcap/packages/ruby/bin:$PATH
@@ -46,8 +46,6 @@ case $1 in
 
     echo "Linking tmp directory"
     if [ ! -L $PACKAGE_DIR/tmp ]; then
-    echo $TMPDIR
-    echo $PACKAGE_DIR
       ln -s $TMPDIR $PACKAGE_DIR/tmp
     fi
     echo "Finished linking tmp directory"

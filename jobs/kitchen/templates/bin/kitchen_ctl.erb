@@ -1,0 +1,86 @@
+#!/bin/bash
+
+set -e # exit immediately if a simple command exits with a non-zero status
+set -u # report the usage of uninitialized variables
+set +x
+
+# Setup env vars and folders for the restaurant_orange script
+JOB_NAME="kitchen"
+source /var/vcap/jobs/$JOB_NAME/helpers/ctl_setup.sh $JOB_NAME
+
+if [ "$2" ]; then
+  export RUNNER="$2"
+else
+  export RUNNER=1
+fi
+
+# Setup env vars for ruby
+export PATH=/var/vcap/packages/ruby/bin:$PATH
+export HOME=/home/vcap # rake needs it to be set to run tasks
+export GEM_PATH=/var/vcap/packages/ruby:/var/vcap/packages/ruby/lib/ruby/gems/2.3.0
+export C_INCLUDE_PATH=/var/vcap/packages/postgresql/include:$C_INCLUDE_PATH
+export LIBRARY_PATH=/var/vcap/packages/postgresql/lib:$LIBRARY_PATH
+export bundle_cmd=/var/vcap/packages/ruby/bin/bundle
+export LANG=en_US.UTF-8
+
+export PACKAGE_DIR=/var/vcap/packages/restaurant_orange_app
+export PIDFILE=$RUN_DIR/delayed_job.$RUNNER.pid
+export DELAYED_JOB_EXECUTABLE=$PACKAGE_DIR/bin/delayed_job
+export PID_DIR=$RUN_DIR/
+
+# Setup env vars for the rails app
+export CONFIG_DIR=$JOB_DIR/config
+export DATABASE_CONFIG=$CONFIG_DIR/database.yml
+export BUNDLE_GEMFILE=$PACKAGE_DIR/Gemfile
+export RAILS_ENV=production
+export SECRET_KEY_BASE=<%= p('restaurant_orange.secret_key_base') %>
+export PORT=<%= p('restaurant_orange.port') %>
+
+setup_worker() {
+  ulimit -n 64000
+
+  cd $PACKAGE_DIR
+
+  echo "Linking log directory"
+  if [ ! -L $PACKAGE_DIR/log ]; then
+    rm -rf $PACKAGE_DIR/log
+    ln -s $LOG_DIR $PACKAGE_DIR/log
+  fi
+  echo "Finished linking log directory"
+
+  echo "Linking tmp directory"
+  if [ ! -L $PACKAGE_DIR/tmp ]; then
+    ln -s $TMPDIR $PACKAGE_DIR/tmp
+  fi
+  echo "Finished linking tmp directory"
+
+  echo "Linking configuration"
+  if [ ! -f $PACKAGE_DIR/config/database.yml ]; then
+    ln -s $DATABASE_CONFIG $PACKAGE_DIR/config/database.yml
+  fi
+  echo "Finished linking configuration"
+}
+
+case $1 in
+
+  start)
+    setup_worker
+
+    pid_guard $PIDFILE "cf_service_guard_worker"
+
+    echo "Starting cf_service_guard_worker daemon"
+    chpst -u vcap:vcap $bundle_cmd exec $DELAYED_JOB_EXECUTABLE start -i $RUNNER --pid-dir=$PID_DIR
+    ;;
+
+  stop)
+    setup_worker
+
+    chpst -u vcap:vcap $bundle_cmd exec $DELAYED_JOB_EXECUTABLE stop -i $RUNNER --pid-dir=$PID_DIR
+    ;;
+
+  *)
+    echo "Usage: cf_service_guard_worker_ctl {start|stop} <worker_number>"
+    ;;
+
+esac
+
