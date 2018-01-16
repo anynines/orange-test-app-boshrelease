@@ -1,0 +1,6 @@
+src/postgresql
+src/libyaml
+src/ruby
+src/zlib
+.dev_builds/
+dev_releases/

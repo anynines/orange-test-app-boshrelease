@@ -1,0 +1,7 @@
+check process restaurant_orange_app
+  with pidfile /var/vcap/sys/run/restaurant_orange_app/restaurant_orange_app.pid
+  start program "/var/vcap/jobs/restaurant_orange_app/bin/restaurant_orange_app_ctl start"
+  stop program "/var/vcap/jobs/restaurant_orange_app/bin/restaurant_orange_app_ctl stop"
+  group vcap
+  if totalmem > 2250 Mb then alert
+if totalmem > 2450 Mb then restart

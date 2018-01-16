@@ -1,0 +1,76 @@
+name: restaurant-orange
+
+update:
+  canaries: 1
+  canary_watch_time: 1000-180000
+  max_in_flight: 2
+  serial: true
+  update_watch_time: 1000-180000
+
+stemcells:
+- os: ubuntu-trusty
+  alias: ubuntu-trusty
+  version: 3468.17
+
+releases:
+- name: restaurant-orange
+  version: latest
+- name: postgres
+  version: 24
+  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release
+
+instance_groups:
+- name: postgres
+  instances: 1
+  azs: [z1]
+  stemcell: ubuntu-trusty
+  persistent_disk_type: small
+  vm_type: small
+  jobs:
+  - name: postgres
+    release: postgres
+    provides:
+      postgres:
+        as: postgres-database
+  networks:
+  - name: static
+    static_ips: [10.244.5.5]
+- name: restaurant
+  instances: 1
+  vm_type: small
+  azs: [z1, z2, z3]
+  stemcell: ubuntu-trusty
+  jobs:
+  - { name: restaurant_orange_app, release: restaurant-orange }
+  networks:
+  - name: dynamic
+
+properties:
+  restaurant_orange:
+    secret_key_base: 'vfelqryfgnqlruiwcfnqwcfqwc' #((restaurant_orange_secret_key_base))
+    port: 3000
+    encryption:
+      salt: 'dewuofgehqrliuvqerf34fwefvq' # ((restaurant_orange_encryption_salt))
+    database:
+      encoding: 'utf8'
+      database_name: restaurantorange
+      username: restaurantorangeuser
+      password: er8oigyqnp8 # ((restaurant_orange_db_password))
+      host: 10.244.5.5
+      port: 5432
+  databases:
+    port: 5432
+    databases:
+    - name: restaurantorange
+    roles:
+    - name: restaurantorangeuser
+      password: er8oigyqnp8
+      permissions: [SUPERUSER]
+
+      # variables:
+      # - name: restaurant_orange_secret_key_base
+      #   type: password
+      # - name: restaurant_orange_encryption_salt
+      #   type: password
+      # - name: restaurant_orange_db_password
+      #  type: password

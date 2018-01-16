@@ -1,0 +1,106 @@
+#!/bin/bash
+
+SRC_DIR="src"
+
+POSTGRES_DIR=$SRC_DIR/postgresql
+POSTGRES_VERSION="9.6.4"
+POSTGRES_TARBALL_FILE=$POSTGRES_DIR/postgresql-$POSTGRES_VERSION.tar.gz
+
+if [ ! -d $SRC_DIR ]; then
+  mkdir -p $SRC_DIR
+fi
+
+if [ ! -d $POSTGRES_DIR ]; then
+  mkdir -p $POSTGRES_DIR
+fi
+
+if [ ! -f $POSTGRES_TARBALL_FILE ]; then
+  echo "Downloading PostgreSQL version $POSTGRES_VERSION tarball"
+  wget https://ftp.postgresql.org/pub/source/v$POSTGRES_VERSION/postgresql-$POSTGRES_VERSION.tar.gz -P $POSTGRES_DIR
+else
+  echo "Detected PostgreSQL tarball. Not downloading."
+fi
+
+
+RUBY_DIR=$SRC_DIR/ruby
+RUBY_VERSION="2.3.1"
+RUBY_SHORT_VERSION="2.3"
+RUBY_TARBALL_FILE=$RUBY_DIR/ruby-$RUBY_VERSION.tar.gz
+RUBYGEMS_VERSION="2.5.1"
+RUBYGEMS_TARBALL_FILE=$RUBY_DIR/rubygems-$RUBYGEMS_VERSION.tgz
+BUNDLER_VERSION="1.15.4"
+BUNDLER_TARBALL_FILE=$RUBY_DIR/bundler-$BUNDLER_VERSION.gem
+
+if [ ! -d $RUBY_DIR ]; then
+  mkdir -p $RUBY_DIR
+fi
+
+if [ ! -f $RUBY_TARBALL_FILE ]; then
+  echo "Downloading Ruby version $RUBY_VERSION tarball"
+  wget https://cache.ruby-lang.org/pub/ruby/$RUBY_SHORT_VERSION/ruby-$RUBY_VERSION.tar.gz -P $RUBY_DIR
+else
+  echo "Detected Ruby tarball. Not downloading."
+fi
+
+if [ ! -f $RUBYGEMS_TARBALL_FILE ]; then
+  echo "Downloading Rubygems version $RUBYGEMS_VERSION tarball"
+  wget https://rubygems.org/rubygems/rubygems-$RUBYGEMS_VERSION.tgz -P $RUBY_DIR
+else
+  echo "Detected Rubygems tarball. Not downloading."
+fi
+
+if [ ! -f $BUNDLER_TARBALL_FILE ]; then
+  echo "Downloading bundler version $BUNDLER_VERSION tarball"
+  wget https://rubygems.org/downloads/bundler-$BUNDLER_VERSION.gem -P $RUBY_DIR
+else
+  echo "Detected bundler gem. Not downloading."
+fi
+
+LIBYAML_DIR=$SRC_DIR/libyaml
+LIBYAML_VERSION="0.1.7"
+LIBYAML_TARBALL_FILE=$LIBYAML_DIR/yaml-$LIBYAML_VERSION.tar.gz
+
+if [ ! -d $LIBYAML_DIR ]; then
+  mkdir -p $LIBYAML_DIR
+fi
+
+if [ ! -f $LIBYAML_TARBALL_FILE ]; then
+  echo "Downloading yaml version $LIBYAML_VERSION tarball"
+  wget http://pyyaml.org/download/libyaml/yaml-$LIBYAML_VERSION.tar.gz -P $LIBYAML_DIR
+else
+  echo "Detected yaml tarball. Not downloading."
+fi
+
+ZLIB_DIR=$SRC_DIR/zlib
+ZLIB_VERSION="1.2.11"
+ZLIB_TARBALL_FILE=$ZLIB_DIR/zlib-$ZLIB_VERSION.tar.gz
+
+if [ ! -d $ZLIB_DIR ]; then
+  mkdir -p $ZLIB_DIR
+fi
+
+if [ ! -f $ZLIB_TARBALL_FILE ]; then
+  echo "Downloading zlib version $ZLIB_VERSION tarball"
+  wget http://zlib.net/zlib-$ZLIB_VERSION.tar.gz -P $ZLIB_DIR
+else
+  echo "Detected zlib tarball. Not downloading."
+fi
+
+ORANGE_TEST_APP_SOURCE_DIR=src/orange_test_app
+ORANGE_TEST_APP_BRANCH="master"
+
+# pull new version
+echo "Pulling newest version from github"
+git pull origin master
+
+# orange_test_app sources
+echo "Updating orange_test_app submodule"
+git submodule update --init
+git submodule update --recursive --remote
+
+echo "Checking out the correct orange_test_app branch: $ORANGE_TEST_APP_BRANCH"
+pushd $ORANGE_TEST_APP_SOURCE_DIR
+  git checkout $ORANGE_TEST_APP_BRANCH
+  echo "Pulling latest version from repository"
+  git pull origin $ORANGE_TEST_APP_BRANCH
+popd

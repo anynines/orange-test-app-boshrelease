@@ -1,0 +1,39 @@
+---
+name: restaurant_orange_app
+
+templates:
+  bin/restaurant_orange_app_ctl.erb: bin/restaurant_orange_app_ctl
+  config/database.yml.erb: config/database.yml
+  data/properties.sh.erb: data/properties.sh
+  helpers/ctl_setup.sh: helpers/ctl_setup.sh
+  helpers/ctl_utils.sh: helpers/ctl_utils.sh
+
+packages:
+  - zlib
+  - libyaml
+  - postgresql
+  - ruby
+  - restaurant_orange_app
+
+properties:
+  restaurant_orange.secret_key_base:
+    description: "The secret key base for the bosh deployer rails app."
+  restaurant_orange.port:
+    description: "The port to run the rails server at."
+    default: 3000
+  restaurant_orange.encryption.salt:
+    description: "The salt for the database record encryption of credential data."
+
+  restaurant_orange.database.encoding:
+    description: "The encoding of the database."
+  restaurant_orange.database.database_name:
+    description: "The name of the database to use for our app."
+  restaurant_orange.database.username:
+    description: "The database username."
+  restaurant_orange.database.password:
+    description: "The database password for the given user."
+  restaurant_orange.database.host:
+    description: "The database host to use for connections."
+  restaurant_orange.database.port:
+    description: "The database port to use for connections."
+    default: 5432

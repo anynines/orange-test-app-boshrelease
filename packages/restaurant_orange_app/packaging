@@ -1,0 +1,20 @@
+# Available variables
+# $BOSH_COMPILE_TARGET - where this package & spec'd source files are available
+# $BOSH_INSTALL_TARGET - where you copy/install files to be included in package
+
+set -e # exit immediately if a simple command exits with a non-zero status
+set -u # report the usage of uninitialized variables
+set +x
+
+export GEM_HOME=/var/vcap/packages/ruby
+
+libpq_dir=/var/vcap/packages/postgresql
+bundle_cmd=/var/vcap/packages/ruby/bin/bundle
+
+mkdir -p ${BOSH_INSTALL_TARGET}
+rm -rf ${BOSH_INSTALL_TARGET}/*
+cp -Ra orange_test_app/* ${BOSH_INSTALL_TARGET}
+cd ${BOSH_INSTALL_TARGET}
+
+${bundle_cmd} config build.pg --with-pg-lib=$libpq_dir/lib --with-pg-include=$libpq_dir/include
+${bundle_cmd} install --local --deployment --without development test

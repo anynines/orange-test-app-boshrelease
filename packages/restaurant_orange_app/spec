@@ -1,0 +1,7 @@
+---
+name: restaurant_orange_app
+dependencies:
+- ruby
+- postgresql
+files:
+- orange_test_app/**/*
